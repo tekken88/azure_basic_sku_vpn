@@ -1,0 +1,29 @@
+Azure Powershell Command:
+
+$location = '<input region>'
+$resourceGroup = '<input resource group>'
+$ngwpip = New-AzPublicIpAddress -Name '<input pip name>' -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -sku Basic
+$vnet = Get-AzVirtualNetwork -Name <input VNet name> -ResourceGroupName $resourceGroup
+$subnet = Get-AzVirtualNetworkSubnetConfig -Name 'GatewaySubnet' -VirtualNetwork $vnet
+$ngwipconfig = New-AzVirtualNetworkGatewayIpConfig -Name ngwipconfig -SubnetId $subnet.Id -PublicIpAddressId $ngwpip.Id
+New-AzVirtualNetworkGateway -Name <input GW name> -ResourceGroupName $resourceGroup -Location $location -IpConfigurations $ngwIpConfig -GatewayType "Vpn" -VpnType <"RouteBased" or "PolicyBased"> -GatewaySku "Basic"
+
+Example:
+$location = 'east us'
+$resourceGroup = 'vpn-test'
+$ngwpip = New-AzPublicIpAddress -Name 'vpn-gw-pip' -ResourceGroupName $resourceGroup -Location $location -AllocationMethod Dynamic -sku Basic
+$vnet = Get-AzVirtualNetwork -Name testvnet -ResourceGroupName $resourceGroup
+$subnet = Get-AzVirtualNetworkSubnetConfig -Name 'GatewaySubnet' -VirtualNetwork $vnet
+$ngwipconfig = New-AzVirtualNetworkGatewayIpConfig -Name vpnnipconfig -SubnetId $subnet.Id -PublicIpAddressId $ngwpip.Id
+New-AzVirtualNetworkGateway -Name basic-sku-vpn -ResourceGroupName $resourceGroup -Location $location -IpConfigurations $ngwIpConfig -GatewayType "Vpn" -VpnType "RouteBased" -GatewaySku "Basic"
+
+
+
+Azure CLI Command:
+
+az network public-ip create --resource-group <Resource Group Name> --location <Region> --name <VPN Public IP Name> --version IPv4 --sku Basic
+az network vnet-gateway create --resource-group <Resource Group Name> --location <Region> --name <VPN Gateway Name> --public-ip-addresses <Name of VPN Public IP Name (must be basic sku)> --vnet <VNET Name> --gateway-type Vpn --sku Basic --vpn-type <RouteBased or Policy Based> --no-wait
+
+Example:
+az network public-ip create --resource-group vpn-test --location east us --name vpn-gw-pip --version IPv4 --sku Basic
+az network vnet-gateway create --resource-group vpn-test --location east us --name basic-sku-vpn --public-ip-addresses vpn-gw-pip --vnet testvnet --gateway-type Vpn --sku Basic --vpn-type RouteBased --no-wait
